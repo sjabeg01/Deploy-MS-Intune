@@ -1,0 +1,68 @@
+
+Intune Auto-Enrollment vs. Windows Autopilot
+Feature	Intune Automatic Enrollment	Windows Autopilot Enrollment
+What it is	Background device enrollment into Intune when a user signs in.	Deployment service that provisions new or re-purposed devices during OOBE.
+When it happens	After a user signs in to Windows with an Entra ID (Azure AD) account (if in MDM scope).	During Out-of-Box Experience (OOBE) on first boot or after device reset.
+Requires reset?	❌ No reset needed – works on existing devices.	✅ Yes – must go through OOBE → requires new device or device reset. Restart alone won’t work.
+Trigger steps	1. In Intune admin center → Devices → Windows enrollment → Automatic enrollment.2. Set MDM user scope = All or group.3. User signs in → device auto-enrolls silently.	1. Import hardware hash (OEM, Intune, PowerShell).2. Assign Autopilot deployment profile.3. Reset device (Wipe, Fresh Start, or Autopilot Reset).4. Device boots into OOBE and applies profile.
+Device visibility	Device appears in Intune → Devices list once enrolled.	Device appears in Intune and is also marked as Autopilot registered.
+End-user experience	Transparent; no OOBE or re-setup required.	Guided OOBE with optional branding, user type (admin/standard), app installs, and Enrollment Status Page.
+Customization	Apply Intune MDM policies, compliance rules, apps, security baselines.	Preconfigure device naming, user account type, OEM branding, ESP, apps, and enrollment options.
+Ideal for	Managing existing devices already in use (no data loss).	New devices or re-purposed devices where standardized provisioning is needed.
+MS Learn Reference	Automatic enrollment
+Windows Autopilot overview
+
+
+🎯 Use Cases
+🔹 Intune Enrollment
+•	You want to start managing users' existing PCs without affecting their data.
+•	You want to enforce compliance policies, install software, and apply configuration profiles.
+•	Best when:
+o	Devices are already Azure AD joined.
+o	You don’t want to wipe/reset devices.
+✅ No wipe
+✅ Easy to roll out
+❌ No deep provisioning or OOBE branding
+
+🔹 Autopilot Enrollment
+•	You are deploying new laptops or reassigning old ones.
+•	You want to give users a fresh setup experience (like new out of the box).
+•	You want to automate provisioning, enforce standard configurations, and set branding.
+✅ Standardizes setup
+✅ Automates provisioning
+❌ Requires device reset
+❌ Not suited for in-use devices unless you want to wipe them
+
+🛠️ Technical Setup Differences
+✅ Intune Auto-Enrollment Setup:
+1.	Go to: Intune admin center → Devices → Enroll Devices → Automatic Enrollment
+2.	Set:
+o	MDM User Scope: All (or a specific group)
+o	MAM User Scope: Optional (only for app protection on BYOD)
+3.	 What happens next:
+When a user signs into a supported Windows device with their Azure AD account, the device:
+o	Automatically registers with Azure AD (if not already)
+o	Auto-enrolls into Intune
+o	Appears in Devices → All Devices in Intune
+📌 This is a silent, background process. No reboot, no reset, no user interruption.
+
+✅Hence, To manage existing Windows PCs (already in use):
+You do NOT need:
+•	Autopilot
+•	Serial numbers
+•	Deployment profile
+You DO need:
+•	Intune MDM Authority set (automatically done in Business Premium tenants)
+•	MDM user scope set to "All" or a group
+•	Azure AD joined (or Hybrid AADJ) devices
+•	Optional: Company Portal (if doing user-driven enrollment)
+Once a user signs into a Windows 10/11 device with Azure AD and is in MDM scope → device gets enrolled in Intune.
+✅ No reset, no serial upload, no Autopilot profile.
+
+✅ Autopilot Enrollment Setup:
+1.	Collect hardware hash (Get-WindowsAutopilotInfo.ps1)
+2.	Upload to: Devices → Enroll Devices → Windows Autopilot Devices
+3.	Assign a Deployment Profile
+4.	Reset device (e.g., Wipe via Intune or manual reinstall)
+5.	On next boot: device runs Autopilot OOBE and auto-joins Azure AD + Intune
+🔁 Wipes existing data and configures as per profile (Without a reset, Autopilot profiles won’t apply)
